@@ -32,20 +32,6 @@ while True:
     cmd = read_key()
 
     if cmd == 'up':
-        if moving == 'forward':
-            moving = None
-            left_motor.brake()
-            right_motor.brake()
-            hub.display.char('S')
-            hub.light.on(Color.BLUE)
-        else:
-            moving = 'forward'
-            left_motor.run(SPEED)
-            right_motor.run(SPEED)
-            hub.display.char('F')
-            hub.light.on(Color.GREEN)
-
-    elif cmd == 'down':
         if moving == 'backward':
             moving = None
             left_motor.brake()
@@ -59,19 +45,33 @@ while True:
             hub.display.char('B')
             hub.light.on(Color.RED)
 
-    elif cmd == 'left':
-        moving = None
-        hub.display.char('L')
-        hub.light.on(Color.YELLOW)
-        left_motor.run_angle(SPEED, -TURN_ANGLE, wait=False)
-        right_motor.run_angle(SPEED, TURN_ANGLE)
+    elif cmd == 'down':
+        if moving == 'forward':
+            moving = None
+            left_motor.brake()
+            right_motor.brake()
+            hub.display.char('S')
+            hub.light.on(Color.BLUE)
+        else:
+            moving = 'forward'
+            left_motor.run(SPEED)
+            right_motor.run(SPEED)
+            hub.display.char('F')
+            hub.light.on(Color.GREEN)
 
-    elif cmd == 'right':
+    elif cmd == 'left':
         moving = None
         hub.display.char('R')
         hub.light.on(Color.YELLOW)
         left_motor.run_angle(SPEED, TURN_ANGLE, wait=False)
         right_motor.run_angle(SPEED, -TURN_ANGLE)
+
+    elif cmd == 'right':
+        moving = None
+        hub.display.char('L')
+        hub.light.on(Color.YELLOW)
+        left_motor.run_angle(SPEED, -TURN_ANGLE, wait=False)
+        right_motor.run_angle(SPEED, TURN_ANGLE)
 
     elif cmd in ('l', 'L'):
         gear_motor.run(GEAR_SPEED)

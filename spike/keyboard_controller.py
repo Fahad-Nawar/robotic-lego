@@ -47,25 +47,25 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
         k_pressed    = keyboard.is_pressed('k')
         j_pressed    = keyboard.is_pressed('j')
 
-        # toggle forward on rising edge
+        # toggle backward on rising edge (UP key)
         if up_pressed and not up_was_pressed:
-            forward_on = not forward_on
-            backward_on = False
-
-        # toggle backward on rising edge
-        if down_pressed and not down_was_pressed:
             backward_on = not backward_on
             forward_on = False
+
+        # toggle forward on rising edge (DOWN key)
+        if down_pressed and not down_was_pressed:
+            forward_on = not forward_on
+            backward_on = False
 
         # turns cancel movement
         if keyboard.is_pressed('right'):
             forward_on = False
             backward_on = False
-            ser.write(b'\x1b[C')
+            ser.write(b'\x1b[D')
         elif keyboard.is_pressed('left'):
             forward_on = False
             backward_on = False
-            ser.write(b'\x1b[D')
+            ser.write(b'\x1b[C')
         elif forward_on:
             ser.write(b'\x1b[A')
         elif backward_on:

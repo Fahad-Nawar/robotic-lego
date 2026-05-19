@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir)",
+      "Bash(dir spike *)",
+      "Bash(dir /b /s *.py)",
+      "Bash(Get-ChildItem -Recurse -Filter *.py)",
+      "Bash(Select-Object FullName)",
+      "Read(//c/Users/Fahad/OneDrive/�� ���袠/**)"
+    ]
+  }
+}
