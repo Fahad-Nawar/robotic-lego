@@ -23,6 +23,7 @@ Requirements:
 import cv2
 import numpy as np
 import sys
+import threading
 
 
 
@@ -64,6 +65,30 @@ FONT          = cv2.FONT_HERSHEY_SIMPLEX
 
 
 
+class CameraStream:
+    def __init__(self, index):
+        self.cap = cv2.VideoCapture(index)
+        self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+        self.ret, self.frame = self.cap.read()
+        self._lock = threading.Lock()
+        self._running = True
+        threading.Thread(target=self._update, daemon=True).start()
+
+    def _update(self):
+        while self._running:
+            ret, frame = self.cap.read()
+            with self._lock:
+                self.ret, self.frame = ret, frame
+
+    def read(self):
+        with self._lock:
+            return self.ret, self.frame.copy() if self.ret else (False, None)
+
+    def release(self):
+        self._running = False
+        self.cap.release()
+
+
 def estimate_distance(pixel_height: float, known_cm: float) -> float:
     if pixel_height <= 0:
         return 0.0
@@ -73,8 +98,8 @@ def estimate_distance(pixel_height: float, known_cm: float) -> float:
 def find_objects(mask):
     """Return list of bounding rects (x,y,w,h) for valid blobs in mask."""
     kernel   = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (7, 7))
-    mask     = cv2.morphologyEx(mask, cv2.MORPH_OPEN,  kernel, iterations=2)
-    mask     = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
+    mask     = cv2.morphologyEx(mask, cv2.MORPH_OPEN,  kernel, iterations=1)
+    mask     = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=1)
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     rects = []
@@ -153,15 +178,15 @@ def read_tuner(lower_y, upper_y, lower_p, upper_p):
 
 
 def main():
-    cap = cv2.VideoCapture(CAMERA_INDEX)
-    if not cap.isOpened():
+    stream = CameraStream(CAMERA_INDEX)
+    if not stream.cap.isOpened():
         print(f"[ERROR] Cannot open camera {CAMERA_INDEX}.")
         print("        Make sure the Camo desktop app is running.")
         print("        Try CAMERA_INDEX = 1 or 2.")
         sys.exit(1)
 
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH,  1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    stream.cap.set(cv2.CAP_PROP_FRAME_WIDTH,  1280)
+    stream.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
     print("[INFO] Camera ready.  Q = quit  |  C = open color tuner")
 
@@ -171,7 +196,7 @@ def main():
     frame_count = 0
 
     while True:
-        ret, frame = cap.read()
+        ret, frame = stream.read()
         if not ret:
             continue
 
@@ -238,7 +263,7 @@ def main():
             tuner_open = True
             print("[INFO] Color tuner opened.")
 
-    cap.release()
+    stream.release()
     cv2.destroyAllWindows()
     print("[INFO] Done.")
 

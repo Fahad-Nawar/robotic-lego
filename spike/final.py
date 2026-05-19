@@ -92,5 +92,6 @@ while True:
         moving = None
         left_motor.brake()
         right_motor.brake()
+        gear_motor.brake()
         hub.display.char('S')
         hub.light.on(Color.BLUE)

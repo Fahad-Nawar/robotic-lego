@@ -26,9 +26,6 @@ print(f"Connecting on {PORT} ...")
 
 up_was_pressed    = False
 down_was_pressed  = False
-l_was_pressed     = False
-k_was_pressed     = False
-j_was_pressed     = False
 
 forward_on  = False
 backward_on = False
@@ -45,7 +42,6 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
         down_pressed = keyboard.is_pressed('down')
         l_pressed    = keyboard.is_pressed('l')
         k_pressed    = keyboard.is_pressed('k')
-        j_pressed    = keyboard.is_pressed('j')
 
         # toggle backward on rising edge (UP key)
         if up_pressed and not up_was_pressed:
@@ -70,20 +66,15 @@ with serial.Serial(PORT, BAUD, timeout=1) as ser:
             ser.write(b'\x1b[A')
         elif backward_on:
             ser.write(b'\x1b[B')
-        elif l_pressed and not l_was_pressed:
+        elif l_pressed:
             ser.write(b'L')
-        elif k_pressed and not k_was_pressed:
+        elif k_pressed:
             ser.write(b'K')
-        elif j_pressed and not j_was_pressed:
-            ser.write(b'J')
         else:
             ser.write(b'x')
 
         up_was_pressed   = up_pressed
         down_was_pressed = down_pressed
-        l_was_pressed    = l_pressed
-        k_was_pressed    = k_pressed
-        j_was_pressed    = j_pressed
         time.sleep(0.05)
 
     ser.write(b'x')
